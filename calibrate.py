@@ -50,7 +50,7 @@ while True:
             adjustSize -= 1
 
     for i in range(12):
-        for m in range(4):
+        for m in range(3):
             done = False
             print('\n')
             print(messages[m] + str(i) + ':')
