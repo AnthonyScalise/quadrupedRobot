@@ -53,10 +53,13 @@ class Motor:
 
     def setDeg(self, degTarget):
         target = self.mapValue(degTarget)
-        if(self.channel in [0, 3, 6, 9]):
-            target = (deg-38)
         self.degree = target
         self.setPos(target)
+#       if(self.channel in [0, 3, 6, 9]):
+#           target = (degTarget-38)
+#       self.degree = target
+#       self.setPos(target)
+
 
     def setPos(self, target):
         if(self.speed == 0):
@@ -79,13 +82,13 @@ positions = [motorList[i].position for i in range(12)] # list of all positions i
 def syncSaves():
     if(positions == [370 for i in range(12)]):
         print('Initializing bot motors...\n')
-        with open('limitProfile.txt') as limits_file:
+        with open('calibrationProfile.txt') as limits_file:
             limitProfile = json.load(limits_file)
         i=0
         for motor in motorList:
-            motor.min = limitProfile['mins'][i]
-            motor.max = limitProfile['maxs'][i]
-            motor.mid = limitProfile['ninety'][i]
+            motor.min = limitProfile['min'][i]
+            motor.max = limitProfile['max'][i]
+            motor.mid = limitProfile['mid'][i]
             if(motor.min < motor.max):
                 motor.mode = (motor.max-motor.min)
                 motor.ninety = (motor.mid-motor.min)
@@ -98,16 +101,16 @@ def syncSaves():
         #feet
         i=0
         while(i<12):
-            motorList[i].degreeConversionNum = (120/motorList[i].mode)
-            motorList[i].degreeRange = 120
+            motorList[i].degreeConversionNum = (180/motorList[i].mode)
+            motorList[i].degreeRange = 180
             i+=3
         #legs
         i=1
         while(i<12):
-            motorList[i].degreeConversionNum = (190/motorList[i].mode)
-            motorList[i].degreeRange = 190
+            motorList[i].degreeConversionNum = (180/motorList[i].mode)
+            motorList[i].degreeRange = 180
             i+=3
-        #arms
+        #hips
         i=2
         while(i<12):
             motorList[i].degreeConversionNum = (90/motorList[i].mode)

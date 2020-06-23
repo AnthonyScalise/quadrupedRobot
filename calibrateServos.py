@@ -30,12 +30,25 @@ def dealJson():
 def calculateDegreeConversion(servo):
     if(dataSets[0][servo] < dataSets[3][servo]):
         fourtyFiveRange = (((dataSets[1][servo]-dataSets[0][servo])+(dataSets[2][servo]-dataSets[1][servo]))/2)
-        ninetyRange = (dataSets[2][servo]-dataSets[0][servo])
+#        ninetyRange = (dataSets[2][servo]-dataSets[0][servo])
     if(dataSets[3][servo] < dataSets[0][servo]):
         fourtyFiveRange = (((dataSets[1][servo]-dataSets[2][servo])+(dataSets[0][servo]-dataSets[1][servo]))/2)
-        ninetyRange = (dataSets[0][servo]-dataSets[2][servo])
-    degreeConversion = (((45/fourtyFiveRange)+(90/ninetyRange))/2)
+#        ninetyRange = (dataSets[0][servo]-dataSets[2][servo])
+#    degreeConversion = (((45/fourtyFiveRange)+(90/ninetyRange))/2)
+    degreeConversion = (45/fourtyFiveRange)
     return degreeConversion
+
+
+def mapValue(value):
+    degMin = 0
+    degMax = 90
+    posMin = dataSets[0][0]
+    posMax = dataSets[2][0]
+    degSpan = degMax - degMin
+    posSpan = posMax - posMin
+    valueScaled = float(value - degMin) / float(degSpan)
+    pwm.set_pwm(0, 0, dataSets[0][0] + (valueScaled * posSpan))
+
 
 possibleKeys = [' ', 'w', 's']
 def checkKeyPress():

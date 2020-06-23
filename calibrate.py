@@ -7,7 +7,7 @@ from motors import *
 #import logging
 #logging.basicConfig(level=logging.DEBUG)
 
-adjustSize = 2
+adjustSize = 1
 
 with open('calibrationProfile.txt') as calibration_profile:
     saves = json.load(calibration_profile)
@@ -26,11 +26,17 @@ def dealJson():
     with open('calibrationProfile.txt', 'w') as outfile:
         json.dump(data, outfile)
 
-possibleKeys = [' ', 'w', 's']
+possibleKeys = [' ', 'w', 's', 'set']
 def checkKeyPress():
     val = input('--> ')
-    if val in possibleKeys:
-        return(possibleKeys.index(val))
+    for x in range(3):
+        if possibleKeys[x] == val:
+            return(x)
+    if val == possibleKeys[3]:
+        try:
+            return([4, int(input('    Enter num: '))])
+        except:
+            return(3)
     else:
         return(3)
 
@@ -44,10 +50,12 @@ while True:
             key = checkKeyPress()
         if(key==0):
             done = True
-        if(key==1):
+        elif(key==1):
             adjustSize += 1
-        if(key==2):
+        elif(key==2):
             adjustSize -= 1
+        elif(key[0]==4):
+            adjustSize = key[1]
 
     for i in range(12):
         for m in range(3):
@@ -66,10 +74,12 @@ while True:
                     dataSets[m][i] += adjustSize
                 elif(key==2):
                     dataSets[m][i] -= adjustSize
+                elif(key[0]==4):
+                    dataSets[m][i] = key[1]
             pwm.set_pwm(i, 0, dataSets[m][i])
     print('\n')
     dealJson()
     for i in range(12):
-        print('Servo ' + str(i) + '  Mid: ' + str(dataSets[0][i]) + '  Min: ' + str(dataSets[1][i]) +
+        print('Servo ' + str(i) + '  Min: ' + str(dataSets[0][i]) + '  Mid: ' + str(dataSets[1][i]) +
               '  Max: ' + str(dataSets[2][i]) + '\n')
     print('\n\n')
