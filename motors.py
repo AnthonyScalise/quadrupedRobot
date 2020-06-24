@@ -14,16 +14,25 @@ class Motor:
         self.position = 370 # defualt positions of motors to protect from bottoming out
         self.degree = 0 # list of degree interpreted positions
         self.degreeConversionNum = 0 # this is the scale for converting pos into deg
+        if self.channel in [0, 3, 6, 9]: # sets 112.892 degrees of range for feet
+            self.degreeMax = 165
+            self.degreeMin = 52.108
+        if self.channel in [1, 4, 7, 10]: # sets 180 degrees of range for legs
+            self.degreeMax = 180
+            self.degreeMin = 0
+        if self.channel in [2, 5, 8, 11]: # sets 90 degrees of range for hips
+            self.degreeMax = 90
+            self.degreeMin = 0
         self.mode = 0
-        self.degreeRange = 0
-        self.ninety = 0
         self.mid = 0
         self.max = 0
         self.min = 0
         self.direction = 0
 
+
     def getDegPos(self):
         return self.degree
+
 
     def posToDeg(self, pos):
         deg = 0
@@ -34,9 +43,10 @@ class Motor:
         deg = int(deg*self.degreeConversionNum)
         return deg
 
+
     def mapValue(self, value):
-        degMax = self.degreeRange
-        degMin = 0
+        degMax = self.degreeMax
+        degMin = self.degreeMin
         if(self.direction == 1):
             posMax = self.max
             posMin = self.min
@@ -48,17 +58,19 @@ class Motor:
         valueScaled = float(value - degMin) / float(degSpan)
         return int(posMin + (valueScaled * posSpan))
 
+
     def setSpeed(self, speed):
         self.speed = speed
 
+
     def setDeg(self, degTarget):
+        if degTarget > self.degreeMax:
+            degTarget = self.degreeMax
+        if degTarget < self.degreeMin:
+            degTarget = self.degreeMin
         target = self.mapValue(degTarget)
         self.degree = target
         self.setPos(target)
-#       if(self.channel in [0, 3, 6, 9]):
-#           target = (degTarget-38)
-#       self.degree = target
-#       self.setPos(target)
 
 
     def setPos(self, target):
@@ -76,54 +88,60 @@ class Motor:
                 pwm.set_pwm(self.channel, 0, pos)
                 time.sleep(self.speed)
 
+
 motorList = [Motor(i) for i in range(12)] # one dimentional list of all motor objects
 positions = [motorList[i].position for i in range(12)] # list of all positions in motorList order
+legList = [[motorList[i] for i in range(3)], [motorList[i] for i in range(3, 6)], [motorList[i] for i in range(6, 9)], [motorList[i] for i in range(9, 12)]]
+
+
+def setLegPos(legNum, speed=0, hipSpeed=0, hipAng, legSpeed=0, legAng, footSpeed=0, footAng):
+    directions = [1, 1, 1]
+    targets = [footAng, legAng, hipAng]
+    joints = [legList[legNum][i] for i in range(3)]
+    if(speed == 0 and hipSpeed == 0 and legSpeed == 0 and footSpeed == 0):
+            for i in range(3):
+                joints[i].setDeg(targets[i])
+            return
+    elif((speed == 0) and (hipSpeed != 0 or legSpeed != 0 or footSpeed != 0)):
+        speeds = [footSpeed, legSpeed, hipSpeed]
+    elif(speed != 0):
+        speeds = [speed, speed, speed]
+    for i in range(3):
+        if(joints[i].degree >= targets[i]):
+            directions[i] = -1
+    while((joints[0].degree != targets[0]) or (joints[1].degree != targets[1]) or (joints[2].degree != targets[2])):
+        for i in range(3):
+            if(joints[i].degree != targets[i]):
+                joints[i].setDeg(joints[i].degree += directions[i])
+                time.sleep(speeds[i])
+
 
 def syncSaves():
-    if(positions == [370 for i in range(12)]):
-        print('Initializing bot motors...\n')
-        with open('calibrationProfile.txt') as limits_file:
-            limitProfile = json.load(limits_file)
-        i=0
-        for motor in motorList:
-            motor.min = limitProfile['min'][i]
-            motor.max = limitProfile['max'][i]
-            motor.mid = limitProfile['mid'][i]
-            if(motor.min < motor.max):
-                motor.mode = (motor.max-motor.min)
-                motor.ninety = (motor.mid-motor.min)
-                motor.direction = 1
-            if(motor.max < motor.min):
-                motor.mode = (motor.min-motor.max)
-                motor.ninety = (motor.mid-motor.max)
-                motor.direction = -1
-            i+=1
-        #feet
-        i=0
-        while(i<12):
-            motorList[i].degreeConversionNum = (180/motorList[i].mode)
-            motorList[i].degreeRange = 180
-            i+=3
-        #legs
-        i=1
-        while(i<12):
-            motorList[i].degreeConversionNum = (180/motorList[i].mode)
-            motorList[i].degreeRange = 180
-            i+=3
-        #hips
-        i=2
-        while(i<12):
-            motorList[i].degreeConversionNum = (90/motorList[i].mode)
-            motorList[i].degreeRange = 90
-            i+=3
-        initialSit()
+    print('Initializing bot motors...\n')
+    with open('calibrationProfile.txt') as limits_file:
+        limitProfile = json.load(limits_file)
+    for motor in motorList:
+        i = motor.channel
+        motor.min = limitProfile['min'][i]
+        motor.max = limitProfile['max'][i]
+        motor.mid = limitProfile['mid'][i]
+        if(motor.min < motor.max):
+            motor.mode = (motor.max-motor.min)
+            motor.direction = 1
+        if(motor.max < motor.min):
+            motor.mode = (motor.min-motor.max)
+            motor.direction = -1
+    for i in range(12):
+        motorList[i].degreeConversionNum = (180/motorList[i].mode)
+
 
 def initialSit():
     stance = [320, 612, 544, 428, 146, 208, 288, 174, 213, 324, 570, 519]
     for i in range(12):
         motorList[i].setPos(stance[i])
 
-def getMotors(): # Returns a multidimentional table of the motors respective to their legs
+
+def getMotorsTable(): # Returns a multidimentional table of the motors respective to their legs
     motors = []
     cols=0
     while(cols<12):
@@ -133,13 +151,16 @@ def getMotors(): # Returns a multidimentional table of the motors respective to 
         cols+=3
     return(motors)
 
-def godLog():
+
+def Logs():
     for motor in motorList:
         print('Motor:'+str(motor.channel)+' Speed:'+str(motor.speed)+' Position:'+str(motor.position)+
         ' Degree:'+str(motor.degree)+' DegreeConversionNum:'+str(round(motor.degreeConversionNum, 7))+' mid:'+
-        str(motor.mid)+' min:'+str(motor.min)+' max:'+str(motor.max)+' Mode:'+str(motor.mode)+' NinetyRange:'+
-        str(motor.ninety)+' Direction:'+str(motor.direction)+' DegreeRange:'+str(motor.degreeRange)+'\n')
+        str(motor.mid)+' min:'+str(motor.min)+' max:'+str(motor.max)+' Mode:'+str(motor.mode)+' Direction:'+
+        str(motor.direction)+' DegreeRange:'+str(motor.degreeRange)+'\n')
+
 
 if True:
     syncSaves()
-#    godLog()
+#    initialSit()
+#    Logs()
