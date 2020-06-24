@@ -3,6 +3,7 @@
 import adafruit_pca9685
 import time
 import json
+import endpoints
 
 pwm = adafruit_pca9685.PCA9685()
 pwm.set_pwm_freq(60)
@@ -152,6 +153,16 @@ def getMotorsTable(): # Returns a multidimentional table of the motors respectiv
     return(motors)
 
 
+def moveUpAndDownTest():
+    print('Moving up and down test\n')
+    while True:
+        height = int(input('    Enter a height in mm: '))
+        for point in endpointList:
+            point.setPointUpDown(50, 50, height, legDegree=45):
+            setLegPos(point.leg, hipAng=point.getHipDeg, legAng=point.getLegDeg, footAng=point.getFootDeg)
+        print('\n')
+
+
 def Logs():
     for motor in motorList:
         print('Motor:'+str(motor.channel)+' Speed:'+str(motor.speed)+' Position:'+str(motor.position)+
@@ -162,5 +173,6 @@ def Logs():
 
 if True:
     syncSaves()
+#    moveUpAndDownTest()
 #    initialSit()
 #    Logs()

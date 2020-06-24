@@ -14,9 +14,8 @@ minZ = -132.27209 #mm
 maxZ = 133.883 #mm
 
 class Endpoint:
-    def __init__(self, channel):
-        self.channel = channel
-        self.leg = int(channel/3)
+    def __init__(self, leg):
+        self.leg = leg
         self.x = 0
         self.y = 0
         self.z = 0
@@ -46,7 +45,7 @@ class Endpoint:
     def getHipDeg(self):
         return self.hipDeg
 
-endpointList = [Endpoint(i) for i in range(12)]
+endpointList = [Endpoint(i) for i in range(4)]
 
 def getEndpointList():
     return endpointList
