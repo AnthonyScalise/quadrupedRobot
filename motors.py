@@ -15,15 +15,19 @@ class Motor:
         self.position = 370 # defualt positions of motors to protect from bottoming out
         self.degree = 0 # list of degree interpreted positions
         self.degreeConversionNum = 0 # this is the scale for converting pos into deg
-        if self.channel in [0, 3, 6, 9]: # sets 112.892 degrees of range for feet
-            self.degreeMax = 165
-            self.degreeMin = 52.108
-        if self.channel in [1, 4, 7, 10]: # sets 180 degrees of range for legs
-            self.degreeMax = 180
-            self.degreeMin = 0
-        if self.channel in [2, 5, 8, 11]: # sets 90 degrees of range for hips
-            self.degreeMax = 90
-            self.degreeMin = 0
+        self.degreeMax = 180
+        self.degreeMin = 0
+        if(self.channel in [2, 5, 8, 11]): # sets limits for shoulders
+            up = 90
+            low = 0
+        if(self.channel in [1, 4, 7, 10]): # sets limits for legs
+            up = 180
+            low = 0
+        if(self.channel in [0, 3, 6, 9]): # sets limits for feet
+            up = 164
+            low = 53
+        self.degUpLimit = up
+        self.degLowLimit = low
         self.mode = 0
         self.mid = 0
         self.max = 0
@@ -46,18 +50,10 @@ class Motor:
 
 
     def mapValue(self, value):
-        degMax = self.degreeMax
-        degMin = self.degreeMin
-        if(self.direction == 1):
-            posMax = self.max
-            posMin = self.min
-        if(self.direction == -1):
-            posMax = self.min
-            posMin = self.max
-        degSpan = degMax - degMin
-        posSpan = posMax - posMin
-        valueScaled = float(value - degMin) / float(degSpan)
-        return int(posMin + (valueScaled * posSpan))
+        degSpan = self.degreeMax - self.degreeMin
+        posSpan = self.max - self.min
+        valueScaled = float(value - self.degreeMin) / float(degSpan)
+        return int(self.min + (valueScaled * posSpan))
 
 
     def setSpeed(self, speed):
@@ -65,10 +61,10 @@ class Motor:
 
 
     def setDeg(self, degTarget):
-        if degTarget > self.degreeMax:
-            degTarget = self.degreeMax
-        if degTarget < self.degreeMin:
-            degTarget = self.degreeMin
+        if degTarget > self.degUpLimit:
+            degTarget = self.degUpLimit
+        if degTarget < self.degLowLimit:
+            degTarget = self.degLowLimit
         target = self.mapValue(degTarget)
         self.degree = target
         self.setPos(target)
@@ -95,7 +91,7 @@ positions = [motorList[i].position for i in range(12)] # list of all positions i
 legList = [[motorList[i] for i in range(3)], [motorList[i] for i in range(3, 6)], [motorList[i] for i in range(6, 9)], [motorList[i] for i in range(9, 12)]]
 
 
-def setLegPos(legNum, speed=0, hipSpeed=0, hipAng, legSpeed=0, legAng, footSpeed=0, footAng):
+def setLegPos(legNum, speed=0, hipSpeed=0, hipAng=0, legSpeed=0, legAng=0, footSpeed=0, footAng=0):
     directions = [1, 1, 1]
     targets = [footAng, legAng, hipAng]
     joints = [legList[legNum][i] for i in range(3)]
@@ -113,7 +109,7 @@ def setLegPos(legNum, speed=0, hipSpeed=0, hipAng, legSpeed=0, legAng, footSpeed
     while((joints[0].degree != targets[0]) or (joints[1].degree != targets[1]) or (joints[2].degree != targets[2])):
         for i in range(3):
             if(joints[i].degree != targets[i]):
-                joints[i].setDeg(joints[i].degree += directions[i])
+                joints[i].setDeg(joints[i].degree + directions[i])
                 time.sleep(speeds[i])
 
 
@@ -158,7 +154,7 @@ def moveUpAndDownTest():
     while True:
         height = int(input('    Enter a height in mm: '))
         for point in endpointList:
-            point.setPointUpDown(50, 50, height, legDegree=45):
+            point.setPointUpDown(50, 50, height, legDegree=45)
             setLegPos(point.leg, hipAng=point.getHipDeg, legAng=point.getLegDeg, footAng=point.getFootDeg)
         print('\n')
 

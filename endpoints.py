@@ -26,7 +26,7 @@ class Endpoint:
         self.legDeg = 0
         self.hipDeg = 0
 
-    def setPointUpDown(self, x, y, z, legDegree=self.legDeg):
+    def setPointUpDown(self, x, y, z, legDegree):
         self.x = x
         self.y = y
         self.z = z

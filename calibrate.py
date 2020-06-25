@@ -8,6 +8,7 @@ from motors import *
 #logging.basicConfig(level=logging.DEBUG)
 
 adjustSize = 1
+doneList = [2, 5, 8, 11]
 
 with open('calibrationProfile.txt') as calibration_profile:
     saves = json.load(calibration_profile)
@@ -58,6 +59,8 @@ while True:
             adjustSize = key[1]
 
     for i in range(12):
+        if i in doneList:
+            continue
         for m in range(3):
             done = False
             print('\n')
