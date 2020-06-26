@@ -32,14 +32,15 @@ def emergancyStop():
 
 def moveJoint():
     def getInput():
-        try:
-            print('\n')
-            motorSelection = int(input('Motor \#:  '))
-            degSelection = int(input('Degree:  '))
-            motorList[motorSelection].setDeg(degSelection)
-            print('Set motor '+str(motorSelection)+' to '+str(degSelection)+' degrees')
-        except:
-            break
+        while True:
+            try:
+                print('\n')
+                motorSelection = int(input('Motor \#:  '))
+                degSelection = int(input('Degree:  '))
+                motorList[motorSelection].setDeg(degSelection)
+                print('Set motor '+str(motorSelection)+' to '+str(degSelection)+' degrees')
+            except:
+                break
 
     while True:
         threading.Thread(target=getInput).start()
