@@ -171,4 +171,4 @@ if True:
     syncSaves()
 #    moveUpAndDownTest()
 #    initialSit()
-#    Logs()
+    Logs()
