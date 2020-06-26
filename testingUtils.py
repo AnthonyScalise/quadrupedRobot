@@ -1,47 +1,48 @@
+from threading import Thread
 from motors import *
 import keyboard
 import os
 
+#active = True
 
 def testWith(program):
-    def runTestProg():
-        os.system('sudo python3 '+program+'.py')
-
-    threading.Thread(target=a).start()
-    threading.Thread(target=emergancyStop).start()
+    os.system('sudo python3 '+program+'.py&')
+    emergancyStop()
 
 
 def emergancyStop():
+    print('\n\n')
+    print('------------------------------------------------------')
+    print('---------------------  E STOP  -----------------------')
+    print('------------------------------------------------------')
+    for i in [2, 5, 8, 11]:
+        motorList[i].setDeg(45)
+    for i in [1, 4, 7, 10]:
+        motorList[i].setDeg(135)
+    for i in [0, 3, 6, 9]:
+        motorList[i].setDeg(90)
     while True:
-        try:
-            if keyboard.is_pressed(' '):
-                print('\n\n')
-                print('------------------------------------------------------')
-                print('---------------------  E STOP  -----------------------')
-                print('------------------------------------------------------')
-                while True:
-                    for i in [2, 5, 8, 11]:
-                        motorList[i].setDeg(45)
-                        for i in [1, 4, 7, 10]:
-                            motorList[i].setDeg(135)
-                        for i in [0, 3, 6, 9]:
-                            motorList[i].setDeg(90)
-        except:
-            break
+        estop()
 
 
 def moveJoint():
-    def getInput():
-        while True:
-            try:
-                print('\n')
-                motorSelection = int(input('Motor \#:  '))
-                degSelection = int(input('Degree:  '))
-                motorList[motorSelection].setDeg(degSelection)
-                print('Set motor '+str(motorSelection)+' to '+str(degSelection)+' degrees')
-            except:
-                break
-
     while True:
-        threading.Thread(target=getInput).start()
-        threading.Thread(target=emergancyStop).start()
+        print('\n')
+        motorSelection = input('Motor Channel:  ')
+        if motorSelection == ' ':
+            emergancyStop()
+        else:
+            motorSelection = int(motorSelection)
+        degSelection = input('Degree:  ')
+        if degSelection == ' ':
+            emergancyStop()
+        else:
+            degSelection = int(degSelection)
+        motorList[motorSelection].setDeg(degSelection)
+        print('Set motor '+str(motorSelection)+' to '+str(degSelection)+' degrees')
+
+
+if True:
+    print('\n\n')
+    print('Estop Enabled\n')
+    moveJoint()

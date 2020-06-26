@@ -8,6 +8,10 @@ import endpoints
 pwm = adafruit_pca9685.PCA9685()
 pwm.set_pwm_freq(60)
 
+hips = [2, 5, 8, 11]
+legs = [1, 4, 7, 10]
+feet = [0, 3, 6, 9]
+
 class Motor:
     def __init__(self, channel):
         self.channel = channel
@@ -17,13 +21,13 @@ class Motor:
         self.degreeConversionNum = 0 # this is the scale for converting pos into deg
         self.degreeMax = 180
         self.degreeMin = 0
-        if(self.channel in [2, 5, 8, 11]): # sets limits for shoulders
+        if(self.channel in hips): # sets limits for shoulders
             up = 90
             low = 0
-        if(self.channel in [1, 4, 7, 10]): # sets limits for legs
+        if(self.channel in legs): # sets limits for legs
             up = 180
             low = 0
-        if(self.channel in [0, 3, 6, 9]): # sets limits for feet
+        if(self.channel in feet): # sets limits for feet
             up = 164
             low = 53
         self.degUpLimit = up
@@ -34,6 +38,9 @@ class Motor:
         self.min = 0
         self.direction = 0
 
+
+    def motorEstop(self):
+        pwm.set_pwm(self.channel, 4096, 0)
 
     def getDegPos(self):
         return self.degree
@@ -90,6 +97,10 @@ motorList = [Motor(i) for i in range(12)] # one dimentional list of all motor ob
 positions = [motorList[i].position for i in range(12)] # list of all positions in motorList order
 legList = [[motorList[i] for i in range(3)], [motorList[i] for i in range(3, 6)], [motorList[i] for i in range(6, 9)], [motorList[i] for i in range(9, 12)]]
 
+def estop():
+    for motor in motorList:
+        motor.motorEstop()
+
 
 def setLegPos(legNum, speed=0, hipSpeed=0, hipAng=0, legSpeed=0, legAng=0, footSpeed=0, footAng=0):
     directions = [1, 1, 1]
@@ -137,6 +148,18 @@ def initialSit():
     for i in range(12):
         motorList[i].setPos(stance[i])
 
+def setHips(deg):
+    for i in hips:
+        motorList[i].setDeg(deg)
+
+def setLegs(deg):
+    for i in legs:
+        motorList[i].setDeg(deg)
+
+def setFeet(deg):
+    for i in feet:
+        motorList[i].setDeg(deg)
+
 
 def getMotorsTable(): # Returns a multidimentional table of the motors respective to their legs
     motors = []
@@ -164,7 +187,7 @@ def Logs():
         print('Motor:'+str(motor.channel)+' Speed:'+str(motor.speed)+' Position:'+str(motor.position)+
         ' Degree:'+str(motor.degree)+' DegreeConversionNum:'+str(round(motor.degreeConversionNum, 7))+' mid:'+
         str(motor.mid)+' min:'+str(motor.min)+' max:'+str(motor.max)+' Mode:'+str(motor.mode)+' Direction:'+
-        str(motor.direction)+' DegreeRange:'+str(motor.degreeRange)+'\n')
+        str(motor.direction)+' DegreeLimitMax:'+str(motor.degUpLimit)+' DegreeLimitMin:'+str(motor.degLowLimit)+'\n')
 
 
 if True:
