@@ -36,6 +36,8 @@ class Endpoint:
         self.legFootPlaneHypo = math.sqrt((math.pow(self.legFootPlaneX)+math.pow(self.legFootPlaneY)))
         self.footDeg = math.degrees(math.asin((math.sin(math.radians(legDegree))/foot)*self.legFootPlaneHypo))
 
+    #def setPositionForwardBack(self, x, y, z, ):
+
     def getFootDeg(self):
         return self.footDeg
 
