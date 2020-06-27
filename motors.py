@@ -188,6 +188,18 @@ def moveUpAndDownTest():
         print('\n')
 
 
+def kinematicsTest():
+    print('Testing kinematics\n')
+    while True:
+        x = int(input('    Enter a value for x mm: '))
+        y = int(input('    Enter a value for y mm: '))
+        z = int(input('    Enter a value for z mm: '))
+        for point in endpointList:
+            point.solveKinematics(60, 60, 50)
+            setLegPos(point.leg, hipAng=point.getHipDeg(), legAng=point.getLegDeg(), footAng=point.getFootDeg())
+        print('\n')
+
+
 def Logs():
     for motor in motorList:
         print('Motor:'+str(motor.channel)+' Speed:'+str(motor.speed)+' Position:'+str(motor.position)+

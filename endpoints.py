@@ -2,9 +2,9 @@
 
 import math
 
-foot = 67.328 #mm
-leg = 51.446 #mm
-hip = 27.40 #mm
+footLen = 67.328 #mm
+legLen = 51.446 #mm
+hipLen = 27.40 #mm
 
 hipHeight = 30 #mm
 
@@ -40,6 +40,17 @@ class Endpoint:
         self.footDeg = math.degrees(math.asin((math.sin(math.radians(legDegree))/foot)*self.legFootPlaneHypo))
 
     #def setPositionForwardBack(self, x, y, z, ):
+
+    def solveKinematics(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.hipDeg = math.degrees(math.atan2(y, x))
+        legDegreeA = (math.atan2(z, legLen))
+        legDiag = math.sqrt(math.pow(legLen, 2) + math.pow(x, 2))
+        legDegreeB = math.acos((math.pow(legLen, 2) + math.pow(legDiag, 2) - math.pow(footLen, 2))/(2 * legLen * legDiag))
+        self.legDeg = math.degrees(legDegreeA+legDegreeB)
+        self.footDeg = math.degrees(math.acos((math.pow(legLen, 2) + math.pow(footLen, 2) - math.pow(legDiag, 2))/(2 * legLen * footLen)))
 
     def getFootDeg(self):
         return self.footDeg
