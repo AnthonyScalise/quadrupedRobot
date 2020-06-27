@@ -72,15 +72,15 @@ class Motor:
             degTarget = self.degUpLimit
         if degTarget < self.degLowLimit:
             degTarget = self.degLowLimit
+        self.degree = degTarget
         target = self.mapValue(degTarget)
-        self.degree = target
         self.setPos(target)
 
 
     def setPos(self, target):
         if(self.speed == 0):
             self.position = target
-            self.degree = self.posToDeg(target)
+#            self.degree = self.posToDeg(target)
             pwm.set_pwm(self.channel, 0, target)
         else:
             direction = 1
@@ -88,7 +88,7 @@ class Motor:
                 direction = -1
             for pos in range(self.position, (target+1), direction):
                 self.position = pos
-                self.degree = self.posToDeg(pos)
+#                self.degree = self.posToDeg(pos)
                 pwm.set_pwm(self.channel, 0, pos)
                 time.sleep(self.speed)
 
@@ -102,26 +102,28 @@ def estop():
         motor.motorEstop()
 
 
-def setLegPos(legNum, speed=0, hipSpeed=0, hipAng=0, legSpeed=0, legAng=0, footSpeed=0, footAng=0):
+def setLegPos(legNum, speed=0, hipAng=0, legAng=0, footAng=0):
     directions = [1, 1, 1]
     targets = [footAng, legAng, hipAng]
     joints = [legList[legNum][i] for i in range(3)]
-    if(speed == 0 and hipSpeed == 0 and legSpeed == 0 and footSpeed == 0):
-            for i in range(3):
-                joints[i].setDeg(targets[i])
-            return
-    elif((speed == 0) and (hipSpeed != 0 or legSpeed != 0 or footSpeed != 0)):
-        speeds = [footSpeed, legSpeed, hipSpeed]
-    elif(speed != 0):
-        speeds = [speed, speed, speed]
     for i in range(3):
-        if(joints[i].degree >= targets[i]):
+        if joints[i].degree > targets[i]:
             directions[i] = -1
-    while((joints[0].degree != targets[0]) or (joints[1].degree != targets[1]) or (joints[2].degree != targets[2])):
-        for i in range(3):
-            if(joints[i].degree != targets[i]):
-                joints[i].setDeg(joints[i].degree + directions[i])
-                time.sleep(speeds[i])
+            if targets[i] < joints[i].degLowLimit:
+                targets[i] = joints[i].degLowLimit
+        else:
+            if targets[i] > joints[i].degUpLimit:
+                targets[i] = joints[i].degUpLimit
+    if speed == 0:
+        for i in range(2, -1, -1):
+            joints[i].setDeg(targets[i])
+            return
+    else:
+        while((joints[0].degree != targets[0]) or (joints[1].degree != targets[1]) or (joints[2].degree != targets[2])):
+            for i in range(2, -1, -1):
+                if (joints[i].degree != targets[i]):
+                    joints[i].setDeg(joints[i].degree + directions[i])
+            time.sleep(speed)
 
 
 def syncSaves():
@@ -144,9 +146,9 @@ def syncSaves():
 
 
 def initialSit():
-    stance = [320, 612, 544, 428, 146, 208, 288, 174, 213, 324, 570, 519]
-    for i in range(12):
-        motorList[i].setPos(stance[i])
+    setHips(45)
+    setLegs(150)
+    setFeet(45)
 
 def setHips(deg):
     for i in hips:
@@ -193,5 +195,5 @@ def Logs():
 if True:
     syncSaves()
 #    moveUpAndDownTest()
-#    initialSit()
-    Logs()
+    initialSit()
+#    Logs()

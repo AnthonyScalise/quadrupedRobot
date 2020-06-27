@@ -15,12 +15,6 @@ def emergancyStop():
     print('------------------------------------------------------')
     print('---------------------  E STOP  -----------------------')
     print('------------------------------------------------------')
-    for i in [2, 5, 8, 11]:
-        motorList[i].setDeg(45)
-    for i in [1, 4, 7, 10]:
-        motorList[i].setDeg(135)
-    for i in [0, 3, 6, 9]:
-        motorList[i].setDeg(90)
     while True:
         estop()
 
