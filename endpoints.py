@@ -15,6 +15,9 @@ maxY = 161.283 #mm
 minZ = -132.27209 #mm
 maxZ = 133.883 #mm
 
+legTrim = -48
+footTrim = 41
+
 class Endpoint:
     def __init__(self, leg):
         self.leg = leg
@@ -35,7 +38,7 @@ class Endpoint:
         self.legDeg = legDegree
         self.hipDeg = math.degrees(math.atan(self.y / self.x))
         self.legFootPlaneX = ((self.x * math.cos(math.radians(self.hipDeg)))-hip)
-        self.legFootPlaneY = self.z - hipHeight
+        self.legFootPlaneY = self.z + hipHeight
         self.legFootPlaneHypo = math.sqrt((math.pow(self.legFootPlaneX, 2)+math.pow(self.legFootPlaneY, 2)))
         self.footDeg = math.degrees(math.asin((math.sin(math.radians(legDegree))/foot)*self.legFootPlaneHypo))
 
@@ -49,8 +52,8 @@ class Endpoint:
         legDegreeA = (math.atan2(z, legLen))
         legDiag = math.sqrt(math.pow(legLen, 2) + math.pow(x, 2))
         legDegreeB = math.acos((math.pow(legLen, 2) + math.pow(legDiag, 2) - math.pow(footLen, 2))/(2 * legLen * legDiag))
-        self.legDeg = math.degrees(legDegreeA+legDegreeB)
-        self.footDeg = math.degrees(math.acos((math.pow(legLen, 2) + math.pow(footLen, 2) - math.pow(legDiag, 2))/(2 * legLen * footLen)))
+        self.legDeg = (math.degrees(legDegreeA+legDegreeB)) + legTrim
+        self.footDeg = (math.degrees(math.acos((math.pow(legLen, 2) + math.pow(footLen, 2) - math.pow(legDiag, 2))/(2 * legLen * footLen)))) + footTrim
 
     def getFootDeg(self):
         return self.footDeg

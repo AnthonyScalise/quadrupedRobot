@@ -146,7 +146,7 @@ def syncSaves():
 def initialSit():
     setHips(45)
     setLegs(150)
-    setFeet(45)
+    setFeet(53)
 
 def initialStand():
     setHips(45)
@@ -195,8 +195,9 @@ def kinematicsTest():
         y = int(input('    Enter a value for y mm: '))
         z = int(input('    Enter a value for z mm: '))
         for point in endpointList:
-            point.solveKinematics(60, 60, 50)
+            point.solveKinematics(x, y, z)
             setLegPos(point.leg, hipAng=point.getHipDeg(), legAng=point.getLegDeg(), footAng=point.getFootDeg())
+            print('Leg Number '+str(point.leg)+'    Setting Hip to: '+str(point.getHipDeg())+' degrees    Setting Leg to: '+str(point.getLegDeg())+' degrees    Setting Foot to: '+str(point.getFootDeg())+' degrees')
         print('\n')
 
 
@@ -210,8 +211,9 @@ def Logs():
 
 if True:
     syncSaves()
-#    initialSit()
-    initialStand()
+    initialSit()
+#    initialStand()
+#    kinematicsTest()
 #    time.sleep(1)
 #    estop()
 #    moveUpAndDownTest()
