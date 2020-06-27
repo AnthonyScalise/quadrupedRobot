@@ -1,5 +1,7 @@
 # This class handles all inverse kinematics endpoint functions for motors.py to use
 
+import math
+
 foot = 67.328 #mm
 leg = 51.446 #mm
 hip = 27.40 #mm
@@ -30,10 +32,11 @@ class Endpoint:
         self.x = x
         self.y = y
         self.z = z
+        self.legDeg = legDegree
         self.hipDeg = math.degrees(math.atan(self.y / self.x))
         self.legFootPlaneX = ((self.x * math.cos(math.radians(self.hipDeg)))-hip)
-        self.legFootPlaneY = self.z
-        self.legFootPlaneHypo = math.sqrt((math.pow(self.legFootPlaneX)+math.pow(self.legFootPlaneY)))
+        self.legFootPlaneY = self.z - hipHeight
+        self.legFootPlaneHypo = math.sqrt((math.pow(self.legFootPlaneX, 2)+math.pow(self.legFootPlaneY, 2)))
         self.footDeg = math.degrees(math.asin((math.sin(math.radians(legDegree))/foot)*self.legFootPlaneHypo))
 
     #def setPositionForwardBack(self, x, y, z, ):

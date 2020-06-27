@@ -3,7 +3,7 @@
 import adafruit_pca9685
 import time
 import json
-import endpoints
+from endpoints import *
 
 pwm = adafruit_pca9685.PCA9685()
 pwm.set_pwm_freq(60)
@@ -80,7 +80,6 @@ class Motor:
     def setPos(self, target):
         if(self.speed == 0):
             self.position = target
-#            self.degree = self.posToDeg(target)
             pwm.set_pwm(self.channel, 0, target)
         else:
             direction = 1
@@ -88,7 +87,6 @@ class Motor:
                 direction = -1
             for pos in range(self.position, (target+1), direction):
                 self.position = pos
-#                self.degree = self.posToDeg(pos)
                 pwm.set_pwm(self.channel, 0, pos)
                 time.sleep(self.speed)
 
@@ -150,6 +148,12 @@ def initialSit():
     setLegs(150)
     setFeet(45)
 
+def initialStand():
+    setHips(45)
+    setLegs(100)
+    setFeet(85)
+
+
 def setHips(deg):
     for i in hips:
         motorList[i].setDeg(deg)
@@ -179,8 +183,8 @@ def moveUpAndDownTest():
     while True:
         height = int(input('    Enter a height in mm: '))
         for point in endpointList:
-            point.setPointUpDown(50, 50, height, legDegree=45)
-            setLegPos(point.leg, hipAng=point.getHipDeg, legAng=point.getLegDeg, footAng=point.getFootDeg)
+            point.setPointUpDown(30, 30, height, legDegree=90)
+            setLegPos(point.leg, hipAng=point.getHipDeg(), legAng=point.getLegDeg(), footAng=point.getFootDeg())
         print('\n')
 
 
@@ -194,6 +198,9 @@ def Logs():
 
 if True:
     syncSaves()
+#    initialSit()
+    initialStand()
+#    time.sleep(1)
+#    estop()
 #    moveUpAndDownTest()
-    initialSit()
 #    Logs()
