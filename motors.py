@@ -147,6 +147,8 @@ def initialSit():
     setHips(45)
     setLegs(150)
     setFeet(53)
+    time.sleep(1)
+    estop()
 
 def initialStand():
     setHips(45)
@@ -191,15 +193,18 @@ def moveUpAndDownTest():
 def kinematicsTest():
     print('Testing kinematics\n')
     while True:
-        x = int(input('    Enter a value for x mm: '))
-        y = int(input('    Enter a value for y mm: '))
-        z = int(input('    Enter a value for z mm: '))
-        for point in endpointList:
-            point.solveKinematics(x, y, z)
-            setLegPos(point.leg, hipAng=point.getHipDeg(), legAng=point.getLegDeg(), footAng=point.getFootDeg())
-            print('Leg Number '+str(point.leg)+'    Setting Hip to: '+str(point.getHipDeg())+' degrees    Setting Leg to: '+str(point.getLegDeg())+' degrees    Setting Foot to: '+str(point.getFootDeg())+' degrees')
-        print('\n')
-
+        try:
+            x = int(input('    Enter a value for x mm: '))
+            y = int(input('    Enter a value for y mm: '))
+            z = int(input('    Enter a value for z mm: '))
+            for point in endpointList:
+                point.solveKinematics(x, y, z)
+                setLegPos(point.leg, hipAng=point.getHipDeg(), legAng=point.getLegDeg(), footAng=point.getFootDeg())
+                print('Leg Number '+str(point.leg)+'    Setting Hip to: '+str(point.getHipDeg())+' degrees    Setting Leg to: '+str(point.getLegDeg())+' degrees    Setting Foot to: '+str(point.getFootDeg())+' degrees')
+            print('\n')
+        except:
+            print('Given Range invalid')
+            kinematicsTest()
 
 def Logs():
     for motor in motorList:
@@ -211,10 +216,9 @@ def Logs():
 
 if True:
     syncSaves()
-    initialSit()
+#    initialSit()
 #    initialStand()
-#    kinematicsTest()
-#    time.sleep(1)
 #    estop()
+    kinematicsTest()
 #    moveUpAndDownTest()
 #    Logs()
