@@ -1,8 +1,9 @@
 # motors.py This file holds all data for all motors and acts as an interface between degree notation and pwm servo control
-
+from multiprocessing import Process, Event
 import adafruit_pca9685
 import time
 import json
+import os
 from endpoints import *
 
 pwm = adafruit_pca9685.PCA9685()
@@ -11,6 +12,10 @@ pwm.set_pwm_freq(60)
 hips = [2, 5, 8, 11]
 legs = [1, 4, 7, 10]
 feet = [0, 3, 6, 9]
+
+motorPositionsList = [None for i in range(12)]
+motorSendEvent = Event()
+motorDoneSendingEvents = [Event() for i in range(12)]
 
 class Motor:
     def __init__(self, channel):
@@ -94,6 +99,26 @@ class Motor:
 motorList = [Motor(i) for i in range(12)] # one dimentional list of all motor objects
 positions = [motorList[i].position for i in range(12)] # list of all positions in motorList order
 legList = [[motorList[i] for i in range(3)], [motorList[i] for i in range(3, 6)], [motorList[i] for i in range(6, 9)], [motorList[i] for i in range(9, 12)]]
+
+
+def sendPosToMotors(index, position):
+    proc_id = os.getpid()
+    motorSendEvent.wait()
+    pwm.set_pwm(index, 0, position)
+    motorDoneSendingEvents[index].set()
+
+def sendMotorPosSchedular():
+    motorSendList = [Process(target=sendPosToMotors, args=(i, motorPositionsList[i])) for i in range(12)]
+    for motorProcess in motorSendList:
+        motorProcess.start()
+    motorSendEvent.set()
+    Process(target=finishMotorSendProcess).start()
+
+def finishMotorSendProcess():
+    for event in motorDoneSendingEvents:
+        event.wait()
+        event.clear()
+    motorSendEvent.clear()
 
 def estop():
     for motor in motorList:
@@ -218,7 +243,7 @@ if True:
     syncSaves()
 #    initialSit()
 #    initialStand()
-#    estop()
-    kinematicsTest()
+    estop()
+#    kinematicsTest()
 #    moveUpAndDownTest()
 #    Logs()
