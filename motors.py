@@ -38,7 +38,7 @@ class Motor:
         self.max = 0
         self.min = 0
         self.direction = 0
-        self.motorTarget = None
+        self.motorTarget = 0
         self.settingEvent = threading.Event()
 
 
@@ -104,7 +104,7 @@ class Motor:
     def sendPosToMotor(self, pos):
         while not self.settingEvent.is_set():
             self.settingEvent.set()
-            pwm.set_pwm(self.index, 0, pos)
+            pwm.set_pwm(self.channel, 0, pos)
             self.position = pos
             self.settingEvent.clear()
 
@@ -245,6 +245,6 @@ if True:
 #    initialSit()
 #    initialStand()
 #    estop()
-    kinematicsTest()
+#    kinematicsTest()
 #    moveUpAndDownTest()
 #    Logs()
