@@ -3,6 +3,7 @@
 import adafruit_pca9685
 import time
 import json
+import threading
 from endpoints import *
 
 pwm = adafruit_pca9685.PCA9685()
@@ -37,6 +38,8 @@ class Motor:
         self.max = 0
         self.min = 0
         self.direction = 0
+        self.motorTarget = None
+        self.settingEvent = threading.Event()
 
 
     def motorEstop(self):
@@ -79,21 +82,43 @@ class Motor:
 
     def setPos(self, target):
         if(self.speed == 0):
-            self.position = target
-            pwm.set_pwm(self.channel, 0, target)
+            self.motorTarget = target
         else:
+            threading.Thread(target=self.setPosWithSpeed, args=(target,)).start()
+
+
+    def setPosWithSpeed(self, target):
+        with threading.lock():
             direction = 1
             if(self.position >= target):
                 direction = -1
-            for pos in range(self.position, (target+1), direction):
-                self.position = pos
-                pwm.set_pwm(self.channel, 0, pos)
+            targetLocalCopy = target
+        for pos in range(self.position, (target+direction), direction):
+            if target == targetLocalCopy:
+                self.motorTarget = pos
                 time.sleep(self.speed)
+            else:
+                break
+
+
+    def sendPosToMotor(self, pos):
+        while not self.settingEvent.is_set():
+            self.settingEvent.set()
+            pwm.set_pwm(self.index, 0, pos)
+            self.position = pos
+            self.settingEvent.clear()
 
 
 motorList = [Motor(i) for i in range(12)] # one dimentional list of all motor objects
 positions = [motorList[i].position for i in range(12)] # list of all positions in motorList order
 legList = [[motorList[i] for i in range(3)], [motorList[i] for i in range(3, 6)], [motorList[i] for i in range(6, 9)], [motorList[i] for i in range(9, 12)]]
+
+
+def updateMotors():
+    while True:
+        for motor in motorList:
+            threading.Thread(target=motor.sendPosToMotor, args=(motor.motorTarget,)).start()
+
 
 def estop():
     for motor in motorList:
@@ -216,6 +241,7 @@ def Logs():
 
 if True:
     syncSaves()
+    threading.Thread(target=updateMotors).start()
 #    initialSit()
 #    initialStand()
 #    estop()
